@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FinApp</title>
+  <meta name="description" content="Gerencie suas finanças pessoais: entradas, saídas, categorias e relatórios." />
+  <link rel="shortcut icon" href="favicon-16x16.png" type="image/x-icon">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="css/app.css" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- ============================================================
+       SIDEBAR
+       ============================================================ -->
+  <aside class="sidebar" id="sidebar">
+
+    <!-- Logo -->
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-inner">
+        <div class="sidebar-logo-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75" />
+          </svg>
+        </div>
+        <h1>FinApp</h1>
+      </div>
+    </div>
+
+    <!-- Nav principal -->
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-section="dashboard" id="navDashboard">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+        </svg>
+        Painel de Finanças
+      </button>
+
+      <button class="nav-item" data-section="reports" id="navReports">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+        </svg>
+        Relatórios
+      </button>
+    </nav>
+
+    <!-- Footer: usuário + logout -->
+    <div class="sidebar-footer">
+      <!-- Card do usuário (clicável → settings) -->
+      <div class="sidebar-user nav-item" data-section="settings">
+        <div class="sidebar-avatar" id="sidebarAvatar">
+          <div id="sidebarAvatarPlaceholder">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+            </svg>
+          </div>
+          <img id="sidebarAvatarImg" src="" alt="Avatar" style="display:none;" />
+        </div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebarUserName">Carregando...</div>
+          <div class="sidebar-user-email" id="sidebarUserEmail"></div>
+        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:14px;height:14px;color:var(--text-muted);flex-shrink:0;">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+        </svg>
+      </div>
+
+      <!-- Botão de logout -->
+      <button class="btn-logout" id="btnLogout">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
+        </svg>
+        Sair da conta
+      </button>
+    </div>
+  </aside><!-- /sidebar -->
+
+  <!-- ============================================================
+       ÁREA PRINCIPAL
+       ============================================================ -->
+  <main class="main-area">
+
+    <!-- ======================================================
+         SEÇÃO: PAINEL DE FINANÇAS
+         ====================================================== -->
+    <section class="section" id="section-dashboard">
+
+      <!-- Saudação -->
+      <p class="greeting">Seja bem-vindo, <span id="greetingName">...</span> 👋</p>
+
+      <!-- Cards de sumário -->
+      <div class="summary-cards">
+        <div class="summary-card">
+          <div class="summary-card-label">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+            Saldo Total
+          </div>
+          <div class="summary-card-value" id="cardSaldo">R$ 0,00</div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-card-label">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="color:var(--entrada)">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" />
+            </svg>
+            Total de Entradas
+          </div>
+          <div class="summary-card-value entrada" id="cardEntradas">R$ 0,00</div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-card-label">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="color:var(--saida)">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6 9 12.75l4.286-4.286a11.948 11.948 0 0 1 4.306 6.43l.776 2.898m0 0 3.182-5.511m-3.182 5.51-5.511-3.181" />
+            </svg>
+            Total de Saídas
+          </div>
+          <div class="summary-card-value saida" id="cardSaidas">R$ 0,00</div>
+        </div>
+      </div>
+
+      <!-- Toolbar: pesquisa + filtros + botões -->
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+          </svg>
+          <input class="search-input" type="text" id="searchInput" placeholder="Pesquisar descrição..." />
+        </div>
+
+        <select class="filter-select" id="filterCategory" title="Filtrar por categoria">
+          <option value="">Todas as categorias</option>
+        </select>
+
+        <select class="filter-select" id="filterType" title="Filtrar por tipo">
+          <option value="all">Todos os tipos</option>
+          <option value="entrada">Entrada</option>
+          <option value="saida">Saída</option>
+        </select>
+
+        <div class="toolbar-spacer"></div>
+
+        <button class="btn-toolbar btn-secondary-toolbar" id="btnNewCategory">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z" />
+          </svg>
+          Nova Categoria
+        </button>
+
+        <button class="btn-toolbar btn-primary-toolbar" id="btnNewEntry">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          Nova Entrada
+        </button>
+      </div>
+
+      <!-- Tabela -->
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Descrição</th>
+              <th>Categoria</th>
+              <th>Valor</th>
+              <th>Tipo</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="entriesBody">
+            <tr><td colspan="6" class="table-empty">
+              <span class="spinner"></span> Carregando...
+            </td></tr>
+          </tbody>
+        </table>
+
+        <!-- Paginação -->
+        <div class="pagination-bar">
+          <div class="per-page-wrap">
+            <span>Linhas por página:</span>
+            <select class="per-page-select" id="perPageSelect">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+          <span id="pageInfo">0–0 de 0</span>
+          <div class="page-nav">
+            <button class="page-nav-btn" id="btnPrevPage" disabled title="Página anterior">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+            <button class="page-nav-btn" id="btnNextPage" disabled title="Próxima página">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div><!-- /table-wrap -->
+
+    </section><!-- /section-dashboard -->
+
+    <!-- ======================================================
+         SEÇÃO: RELATÓRIOS
+         ====================================================== -->
+    <section class="section" id="section-reports" style="display:none;">
+      <div class="section-header">
+        <h2>Relatórios Mensais</h2>
+        <p>Acompanhe o desempenho financeiro ao longo do ano.</p>
+      </div>
+
+      <div class="reports-toolbar">
+        <label for="reportYear">Ano:</label>
+        <select class="year-select" id="reportYear"></select>
+        <div class="reports-spinner" id="reportsSpinner">
+          <span class="spinner"></span> Carregando dados...
+        </div>
+      </div>
+
+      <div class="reports-grid">
+        <!-- Gráfico de barras -->
+        <div class="report-card">
+          <h3>Entradas vs Saídas por Mês</h3>
+          <div class="chart-wrap">
+            <canvas id="barChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Gráfico de pizza -->
+        <div class="report-card">
+          <h3>Saídas por Categoria</h3>
+          <div class="chart-wrap">
+            <canvas id="pieChart"></canvas>
+            <div class="pie-no-data" id="pieNoData">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5" />
+              </svg>
+              <span>Sem dados de saídas<br/>neste período.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabela de histórico mensal -->
+      <div class="history-table-wrap">
+        <h3>Histórico Mensal</h3>
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Mês</th>
+              <th>Entradas</th>
+              <th>Saídas</th>
+              <th>Saldo do Mês</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+      </div>
+    </section><!-- /section-reports -->
+
+    <!-- ======================================================
+         SEÇÃO: CONFIGURAÇÕES
+         ====================================================== -->
+    <section class="section" id="section-settings" style="display:none;">
+      <div class="section-header">
+        <h2>Configurações da Conta</h2>
+        <p>Gerencie seu perfil e preferências.</p>
+      </div>
+
+      <div class="settings-card">
+
+        <!-- Avatar -->
+        <div class="settings-avatar-section">
+          <div class="avatar-preview-wrap">
+            <div class="avatar-preview">
+              <img id="avatarPreview" src="" alt="Foto de perfil" />
+              <div id="avatarPlaceholder">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+          <div class="avatar-actions">
+            <p>Adicione uma foto de perfil.<br/>PNG, JPG ou WEBP · Máx. 5 MB</p>
+            <button class="btn-avatar-upload" id="btnUploadAvatar">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+              </svg>
+              Alterar foto
+            </button>
+            <button class="btn-avatar-remove" id="btnRemoveAvatar">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+              </svg>
+              Remover foto
+            </button>
+            <!-- Input de arquivo oculto -->
+            <input type="file" id="avatarInput" accept="image/*" style="display:none;" />
+          </div>
+        </div>
+
+        <!-- Alerta de settings -->
+        <div class="settings-alert-wrap">
+          <div class="alert-msg" id="settingsAlert"></div>
+        </div>
+
+        <!-- Formulário de perfil -->
+        <form id="settingsForm" novalidate>
+          <div class="settings-form-group">
+            <label for="settingName">Nome</label>
+            <input class="settings-input" type="text" id="settingName" placeholder="Seu nome completo" required />
+          </div>
+          <div class="settings-form-group">
+            <label for="settingEmail">E-mail</label>
+            <input class="settings-input" type="email" id="settingEmail" disabled title="Para alterar o e-mail, use as configurações do Supabase." />
+          </div>
+          <button class="btn-save-profile" type="submit" id="btnSaveProfile">Salvar alterações</button>
+        </form>
+
+        <div class="settings-divider"></div>
+
+        <!-- Logout -->
+        <div>
+          <p style="font-size:.82rem;color:var(--text-medium);margin-bottom:12px;">Ao sair, você será redirecionado para a tela de login.</p>
+          <button class="btn-logout-settings" id="btnLogoutSettings">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
+            </svg>
+            Sair da conta
+          </button>
+        </div>
+
+      </div>
+    </section><!-- /section-settings -->
+
+  </main><!-- /main-area -->
+</div><!-- /app-layout -->
+
+
+<!-- ============================================================
+     MODAL: NOVA / EDITAR ENTRADA
+     ============================================================ -->
+<div class="modal fade" id="entryModal" tabindex="-1" aria-labelledby="entryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form id="entryForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="entryModalLabel">Nova Entrada</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="entryDate">Data</label>
+              <input type="date" id="entryDate" class="form-control" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="entryType">Tipo</label>
+              <select id="entryType" class="form-select">
+                <option value="entrada">Entrada</option>
+                <option value="saida">Saída</option>
+              </select>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label" for="entryDescription">Descrição</label>
+              <input type="text" id="entryDescription" class="form-control">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="entryCategory">Categoria</label>
+              <select id="entryCategory" class="form-select">
+                <option value="">— Sem categoria —</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="entryValue">Valor</label>
+              <input type="number" id="entryValue" class="form-control" step="0.01" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-gradient" id="btnSaveEntry">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL: CATEGORIAS
+     ============================================================ -->
+<div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="categoryModalLabel">Gerenciar Categorias</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <form id="categoryForm">
+          <div class="row g-3">
+
+            <div class="col-md-8">
+              <label class="form-label" for="categoryName">Nome</label>
+              <input type="text" id="categoryName" class="form-control" required>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label" for="categoryColor">Cor</label>
+              <input type="color" id="categoryColor" class="form-control form-control-color" value="#701c1c">
+            </div>
+
+            <div class="col-12">
+              <button type="submit" class="btn btn-gradient w-100">
+                Adicionar categoria
+              </button>
+            </div>
+
+          </div>
+        </form>
+
+        <hr>
+
+        <div id="categoryList"></div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL: CONFIRMAÇÃO DE EXCLUSÃO
+     ============================================================ -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmTitle">Confirmar exclusão</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <p id="confirmMsg" class="mb-0"></p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" onclick="_dashCancel()">Cancelar</button>
+        <button type="button" class="btn btn-danger" onclick="_dashConfirm()">Excluir</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module" src="js/app.js"></script>
+
+</body>
+</html>
