@@ -1,0 +1,33 @@
+{
+  "name": "FinApp - Controle Financeiro",
+  "short_name": "FinApp",
+  "description": "Gerencie suas finanças pessoais com facilidade: receitas, despesas, categorias e relatórios gráficos.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#46140c",
+  "theme_color": "#110e0c",
+  "lang": "pt-BR",
+  "categories": ["finance", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

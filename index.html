@@ -6,6 +6,15 @@
   <title>FinApp | Entrar</title>
   <meta name="description" content="Gerencie suas finanças pessoais com facilidade. Faça login ou crie sua conta no FinApp." />
   <link rel="shortcut icon" href="favicon-16x16.png" type="image/x-icon">
+  
+  <!-- Configurações PWA e Web App Manifest -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#110e0c" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="FinApp" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+
   <!-- Folha de estilo visual exclusiva da tela de autenticação -->
   <link rel="stylesheet" href="css/auth.css" />
 </head>
@@ -160,7 +169,8 @@
   </div><!-- /auth-card -->
 </div><!-- /auth-wrapper -->
 
-<!-- Módulo de autenticação JavaScript -->
+<!-- Registro do Service Worker (PWA) e Módulo de autenticação -->
+<script type="module" src="js/sw-register.js"></script>
 <script type="module" src="js/auth.js"></script>
 
 </body>
