@@ -401,7 +401,10 @@ html, body {
   background: var(--table-bg);
   border-radius: var(--radius);
   box-shadow: var(--shadow-card);
-  overflow: hidden;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .data-table {
