@@ -722,7 +722,9 @@ html, body {
   backdrop-filter: blur(12px);
   border-radius: var(--radius);
   box-shadow: var(--shadow-card);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
   border: none;
 }
 
