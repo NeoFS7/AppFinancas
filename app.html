@@ -6,9 +6,11 @@
   <title>FinApp</title>
   <meta name="description" content="Gerencie suas finanças pessoais: entradas, saídas, categorias e relatórios." />
   <link rel="shortcut icon" href="favicon-16x16.png" type="image/x-icon">
+  <!-- Bootstrap 5 CSS para componentes de modal, grid e formulários -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Estilos visuais personalizados do aplicativo -->
   <link rel="stylesheet" href="css/app.css" />
-  <!-- Chart.js -->
+  <!-- Chart.js para renderização de gráficos financeiros -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -16,11 +18,11 @@
 <div class="app-layout">
 
   <!-- ============================================================
-       SIDEBAR
+       1. SIDEBAR — Barra Lateral de Navegação
        ============================================================ -->
   <aside class="sidebar" id="sidebar">
 
-    <!-- Logo -->
+    <!-- Logo da Marca -->
     <div class="sidebar-logo">
       <div class="sidebar-logo-inner">
         <div class="sidebar-logo-icon">
@@ -32,7 +34,7 @@
       </div>
     </div>
 
-    <!-- Nav principal -->
+    <!-- Links de Navegação Principal -->
     <nav class="sidebar-nav">
       <button class="nav-item active" data-section="dashboard" id="navDashboard">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
@@ -49,9 +51,9 @@
       </button>
     </nav>
 
-    <!-- Footer: usuário + logout -->
+    <!-- Rodapé da Sidebar: Card do usuário e Botão de Logout -->
     <div class="sidebar-footer">
-      <!-- Card do usuário (clicável → settings) -->
+      <!-- Card do usuário logado (ao clicar, navega para configurações) -->
       <div class="sidebar-user nav-item" data-section="settings">
         <div class="sidebar-avatar" id="sidebarAvatar">
           <div id="sidebarAvatarPlaceholder">
@@ -71,7 +73,7 @@
         </svg>
       </div>
 
-      <!-- Botão de logout -->
+      <!-- Botão para deslogar da conta -->
       <button class="btn-logout" id="btnLogout">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
@@ -82,19 +84,39 @@
   </aside><!-- /sidebar -->
 
   <!-- ============================================================
-       ÁREA PRINCIPAL
+       2. ÁREA PRINCIPAL DE CONTEÚDO (Main Area)
        ============================================================ -->
+  <!-- Overlay escurecido para fechar a sidebar no mobile com toque fora -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
   <main class="main-area">
 
+    <!-- Topbar Mobile com botão de menu hambúrguer (visível em telas menores) -->
+    <div class="mobile-topbar" id="mobileTopbar">
+      <button class="hamburger-btn" id="hamburgerBtn" aria-label="Abrir menu">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+        </svg>
+      </button>
+      <div class="mobile-logo">
+        <div class="mobile-logo-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75" />
+          </svg>
+        </div>
+        <span>FinApp</span>
+      </div>
+    </div>
+
     <!-- ======================================================
-         SEÇÃO: PAINEL DE FINANÇAS
+         2.1 SEÇÃO: PAINEL DE FINANÇAS (DASHBOARD)
          ====================================================== -->
     <section class="section" id="section-dashboard">
 
-      <!-- Saudação -->
+      <!-- Saudação personalizada com o nome do usuário -->
       <p class="greeting">Seja bem-vindo, <span id="greetingName">...</span> 👋</p>
 
-      <!-- Cards de sumário -->
+      <!-- Cards de resumo financeiro: Saldo, Entradas e Saídas -->
       <div class="summary-cards">
         <div class="summary-card">
           <div class="summary-card-label">
@@ -127,8 +149,9 @@
         </div>
       </div>
 
-      <!-- Toolbar: pesquisa + filtros + botões -->
+      <!-- Barra de Ferramentas: Busca, Filtros e Botões de Ação -->
       <div class="toolbar">
+        <!-- Campo de Pesquisa textual na descrição -->
         <div class="search-wrap">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
@@ -136,10 +159,12 @@
           <input class="search-input" type="text" id="searchInput" placeholder="Pesquisar descrição..." />
         </div>
 
+        <!-- Filtro por Categoria -->
         <select class="filter-select" id="filterCategory" title="Filtrar por categoria">
           <option value="">Todas as categorias</option>
         </select>
 
+        <!-- Filtro por Tipo de Lançamento -->
         <select class="filter-select" id="filterType" title="Filtrar por tipo">
           <option value="all">Todos os tipos</option>
           <option value="entrada">Entrada</option>
@@ -148,6 +173,7 @@
 
         <div class="toolbar-spacer"></div>
 
+        <!-- Botão para Gerenciar Categorias -->
         <button class="btn-toolbar btn-secondary-toolbar" id="btnNewCategory">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" />
@@ -156,6 +182,7 @@
           Nova Categoria
         </button>
 
+        <!-- Botão para Abrir Modal de Nova Entrada -->
         <button class="btn-toolbar btn-primary-toolbar" id="btnNewEntry">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -164,7 +191,7 @@
         </button>
       </div>
 
-      <!-- Tabela -->
+      <!-- Tabela de Lançamentos -->
       <div class="table-wrap">
         <table class="data-table">
           <thead>
@@ -184,7 +211,7 @@
           </tbody>
         </table>
 
-        <!-- Paginação -->
+        <!-- Barra de Controle de Paginação -->
         <div class="pagination-bar">
           <div class="per-page-wrap">
             <span>Linhas por página:</span>
@@ -214,7 +241,7 @@
     </section><!-- /section-dashboard -->
 
     <!-- ======================================================
-         SEÇÃO: RELATÓRIOS
+         2.2 SEÇÃO: RELATÓRIOS MENSAIS
          ====================================================== -->
     <section class="section" id="section-reports" style="display:none;">
       <div class="section-header">
@@ -222,6 +249,7 @@
         <p>Acompanhe o desempenho financeiro ao longo do ano.</p>
       </div>
 
+      <!-- Barra de seleção de ano e indicador de carregamento -->
       <div class="reports-toolbar">
         <label for="reportYear">Ano:</label>
         <select class="year-select" id="reportYear"></select>
@@ -231,7 +259,7 @@
       </div>
 
       <div class="reports-grid">
-        <!-- Gráfico de barras -->
+        <!-- Gráfico de barras: Comparativo mês a mês -->
         <div class="report-card">
           <h3>Entradas vs Saídas por Mês</h3>
           <div class="chart-wrap">
@@ -239,11 +267,12 @@
           </div>
         </div>
 
-        <!-- Gráfico de pizza -->
+        <!-- Gráfico de rosca/pizza: Distribuição de despesas por categoria -->
         <div class="report-card">
           <h3>Saídas por Categoria</h3>
           <div class="chart-wrap">
             <canvas id="pieChart"></canvas>
+            <!-- Mensagem caso não existam despesas registradas no ano -->
             <div class="pie-no-data" id="pieNoData">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5" />
@@ -254,7 +283,7 @@
         </div>
       </div>
 
-      <!-- Tabela de histórico mensal -->
+      <!-- Tabela consolidada de histórico dos 12 meses -->
       <div class="history-table-wrap">
         <h3>Histórico Mensal</h3>
         <table class="history-table">
@@ -272,7 +301,7 @@
     </section><!-- /section-reports -->
 
     <!-- ======================================================
-         SEÇÃO: CONFIGURAÇÕES
+         2.3 SEÇÃO: CONFIGURAÇÕES DA CONTA
          ====================================================== -->
     <section class="section" id="section-settings" style="display:none;">
       <div class="section-header">
@@ -282,7 +311,7 @@
 
       <div class="settings-card">
 
-        <!-- Avatar -->
+        <!-- Seção de Foto de Perfil / Avatar -->
         <div class="settings-avatar-section">
           <div class="avatar-preview-wrap">
             <div class="avatar-preview">
@@ -308,17 +337,17 @@
               </svg>
               Remover foto
             </button>
-            <!-- Input de arquivo oculto -->
+            <!-- Input de arquivo invisível acionado via JavaScript -->
             <input type="file" id="avatarInput" accept="image/*" style="display:none;" />
           </div>
         </div>
 
-        <!-- Alerta de settings -->
+        <!-- Alerta de feedback de alterações do perfil -->
         <div class="settings-alert-wrap">
           <div class="alert-msg" id="settingsAlert"></div>
         </div>
 
-        <!-- Formulário de perfil -->
+        <!-- Formulário de dados do perfil -->
         <form id="settingsForm" novalidate>
           <div class="settings-form-group">
             <label for="settingName">Nome</label>
@@ -333,7 +362,7 @@
 
         <div class="settings-divider"></div>
 
-        <!-- Logout -->
+        <!-- Botão de Logout secundário nas configurações -->
         <div>
           <p style="font-size:.82rem;color:var(--text-medium);margin-bottom:12px;">Ao sair, você será redirecionado para a tela de login.</p>
           <button class="btn-logout-settings" id="btnLogoutSettings">
@@ -352,7 +381,7 @@
 
 
 <!-- ============================================================
-     MODAL: NOVA / EDITAR ENTRADA
+     3. MODAL: NOVA / EDITAR ENTRADA (Bootstrap 5)
      ============================================================ -->
 <div class="modal fade" id="entryModal" tabindex="-1" aria-labelledby="entryModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
@@ -407,7 +436,7 @@
 </div>
 
 <!-- ============================================================
-     MODAL: CATEGORIAS
+     4. MODAL: GERENCIAR CATEGORIAS (Bootstrap 5)
      ============================================================ -->
 <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -420,6 +449,7 @@
 
       <div class="modal-body">
 
+        <!-- Formulário para adicionar nova categoria -->
         <form id="categoryForm">
           <div class="row g-3">
 
@@ -444,6 +474,7 @@
 
         <hr>
 
+        <!-- Lista dinâmica de categorias cadastradas -->
         <div id="categoryList"></div>
 
       </div>
@@ -453,7 +484,7 @@
 </div>
 
 <!-- ============================================================
-     MODAL: CONFIRMAÇÃO DE EXCLUSÃO
+     5. MODAL: CONFIRMAÇÃO DE EXCLUSÃO (Bootstrap 5)
      ============================================================ -->
 <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
@@ -475,7 +506,9 @@
   </div>
 </div>
 
-<!-- Scripts -->
+<!-- ============================================================
+     SCRIPTS: BOOTSTRAP BUNDLE & APLICATIVO
+     ============================================================ -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script type="module" src="js/app.js"></script>
 

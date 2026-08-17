@@ -1,50 +1,72 @@
 /* ============================================================
-   APP.CSS — Estilos do aplicativo principal
+   APP.CSS — Estilos Visuais do Painel Principal (FinApp)
+   ------------------------------------------------------------
+   Contém:
+   1. Tipografia e Variáveis CSS (Design Tokens de Cores, Sombras e Raios)
+   2. Layout Principal (Sidebar fixa e Área de Conteúdo rolável)
+   3. Barra Lateral (Sidebar): Logo, Navegação, Card de Usuário e Logout
+   4. Área Principal (Main Area) com fundo gradiente premium
+   5. Cards de Resumo (Saldo, Entradas e Saídas com micro-animação)
+   6. Barra de Ferramentas (Toolbar): Busca com ícone, Filtros e Botões
+   7. Tabela de Lançamentos com Badges e Ações
+   8. Barra de Paginação
+   9. Customizações visuais sobre os Modais do Bootstrap 5
+   10. Seção de Relatórios: Cards de Gráficos e Tabela de Histórico Anual
+   11. Seção de Configurações: Avatar com upload, Formulário e Alertas
+   12. Componentes Mobile: Topbar com Hambúrguer e Overlay de Gaveta
+   13. Breakpoints de Responsividade (900px, 700px e 560px)
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
 
-/* ---------- Reset & Base ---------- */
+/* ============================================================
+   1. RESET & VARIÁVEIS GLOBAIS (Design Tokens)
+   ============================================================ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --sidebar-w:       268px;
-  --sidebar-bg:      #110e0c;
-  --sidebar-hover:   rgba(160, 32, 32, 0.1);
-  --sidebar-active:  rgba(150, 60, 60, 0.20);
-  --sidebar-border:  rgba(255,255,255,0.1);
-  --main-bg:         rgba(150, 10, 10, 0.5);
-  --main-bg2:        #311919;
-  --card-bg:         rgba(255, 255, 255, 0.20);
-  --card-border:     rgba(255,255,255,0.30);
-  --table-bg:        rgba(255,255,255,0.88);
-  --table-header:    #7a5c3d;
-  --table-row-alt:   #f8f0e4;
-  --table-border:    rgba(139,110,82,0.18);
-  --modal-bg:        #2c1a0e;
-  --entrada:         #048f3c;
-  --saida:           #df2e1b;
-  --text-dark:       #1a0f08;
-  --text-medium:     #0000007e;
-  --text-light:      #f5ede0;
-  --text-muted:      rgba(245,237,224,0.55);
-  --accent:          #240f0f;
-  --accent-hover:    #701c1c;
-  --white:           #ffffff;
-  --radius:          16px;
-  --radius-sm:       10px;
-  --radius-xs:       6px;
-  --transition:      0.28s cubic-bezier(0.4, 0, 0.2, 1);
-  --shadow-card:     0 8px 32px rgba(44,26,14,0.18);
-  --shadow-modal:    0 32px 80px rgba(0,0,0,0.55);
+  --sidebar-w:       268px;                     /* Largura da sidebar no desktop */
+  --sidebar-bg:      #110e0c;                   /* Fundo escuro da barra lateral */
+  --sidebar-hover:   rgba(160, 32, 32, 0.1);    /* Efeito hover nos itens de menu */
+  --sidebar-active:  rgba(150, 60, 60, 0.20);   /* Fundo do item de menu selecionado */
+  --sidebar-border:  rgba(255,255,255,0.1);     /* Linha divisória suave */
+  --main-bg:         rgba(150, 10, 10, 0.5);    /* Base de cor para a área central */
+  --main-bg2:        #311919;                   /* Cor secundária para gradientes */
+  --card-bg:         rgba(255, 255, 255, 0.20); /* Fundo glassmorphic translúcido */
+  --card-border:     rgba(255,255,255,0.30);    /* Borda sutil dos cards */
+  --table-bg:        rgba(255,255,255,0.88);    /* Fundo claro da tabela principal */
+  --table-header:    #7a5c3d;                   /* Tom base do cabeçalho */
+  --table-row-alt:   #f8f0e4;                   /* Cor zebrada para linhas pares */
+  --table-border:    rgba(139,110,82,0.18);     /* Borda entre linhas da tabela */
+  --modal-bg:        #2c1a0e;                   /* Fundo base para modais */
+  --entrada:         #048f3c;                   /* Verde vibrante para receitas/entradas */
+  --saida:           #df2e1b;                   /* Vermelho vibrante para despesas/saídas */
+  --text-dark:       #1a0f08;                   /* Texto escuro principal */
+  --text-medium:     #0000007e;                 /* Texto secundário/médio */
+  --text-light:      #f5ede0;                   /* Texto claro sobre fundos escuros */
+  --text-muted:      rgba(245,237,224,0.55);    /* Texto desbotado/suave */
+  --accent:          #240f0f;                   /* Tom escuro de destaque da marca */
+  --accent-hover:    #701c1c;                   /* Tom vinho/avermelhado de destaque */
+  --white:           #ffffff;                   /* Branco puro */
+  --radius:          16px;                      /* Raio de arredondamento padrão */
+  --radius-sm:       10px;                      /* Raio para botões e inputs */
+  --radius-xs:       6px;                       /* Raio pequeno para badges e tags */
+  --transition:      0.28s cubic-bezier(0.4, 0, 0.2, 1); /* Transição suave */
+  --shadow-card:     0 8px 32px rgba(44,26,14,0.18);     /* Sombra dos cards */
+  --shadow-modal:    0 32px 80px rgba(0,0,0,0.55);       /* Sombra profunda dos modais */
 }
 
-html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; background: var(--main-bg); color: var(--text-dark); }
+html, body {
+  width: 100%;
+  height: 100%;
+  font-family: 'Inter', sans-serif;
+  background: var(--main-bg);
+  color: var(--text-dark);
+}
 
 /* ============================================================
-   LAYOUT PRINCIPAL
+   2. LAYOUT PRINCIPAL
    ============================================================ */
-
 .app-layout {
   display: flex;
   height: 100vh;
@@ -52,9 +74,8 @@ html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; backgr
 }
 
 /* ============================================================
-   SIDEBAR
+   3. BARRA LATERAL (SIDEBAR)
    ============================================================ */
-
 .sidebar {
   width: var(--sidebar-w);
   min-width: var(--sidebar-w);
@@ -67,7 +88,7 @@ html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; backgr
   position: relative;
 }
 
-/* Logo */
+/* Logo da Sidebar */
 .sidebar-logo {
   padding: 28px 22px 24px;
   border-bottom: 1px solid var(--sidebar-border);
@@ -95,7 +116,7 @@ html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; backgr
   line-height: 1;
 }
 
-/* Nav */
+/* Itens de Navegação */
 .sidebar-nav {
   flex: 1;
   padding: 16px 12px;
@@ -129,7 +150,7 @@ html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; backgr
   box-shadow: inset 3px 0 0 var(--main-bg);
 }
 
-/* Footer (Configurações + Logout) */
+/* Rodapé da Sidebar (Card do Usuário + Logout) */
 .sidebar-footer {
   padding: 16px 12px;
   border-top: 1px solid var(--sidebar-border);
@@ -138,7 +159,6 @@ html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; backgr
   gap: 4px;
 }
 
-/* Avatar do usuário */
 .sidebar-user {
   display: flex; align-items: center; gap: 10px;
   padding: 12px 14px;
@@ -193,32 +213,30 @@ html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; backgr
 .btn-logout svg { width: 15px; height: 15px; }
 
 /* ============================================================
-   ÁREA PRINCIPAL
+   4. ÁREA PRINCIPAL (MAIN AREA)
    ============================================================ */
-
 .main-area {
   flex: 1;
   height: 100vh;
   min-width: 0;
   overflow-y: auto;
-   background:
-        radial-gradient(
-            ellipse 70% 50% at 80% 10%,
-            rgba(112, 28, 28, 0.18) 0%,
-            transparent 55%
-        ),
-        linear-gradient(
-            160deg,
-            var(--main-bg2) 0%,
-            #50190f 55%,
-            #171211 100%
-        );
+  background:
+    radial-gradient(
+      ellipse 70% 50% at 80% 10%,
+      rgba(112, 28, 28, 0.18) 0%,
+      transparent 55%
+    ),
+    linear-gradient(
+      160deg,
+      var(--main-bg2) 0%,
+      #50190f 55%,
+      #171211 100%
+    );
 }
 
 /* ============================================================
-   SEÇÕES
+   5. SEÇÕES & CABEÇALHOS
    ============================================================ */
-
 .section { padding: 36px 40px; min-height: 100%; }
 .section-header { margin-bottom: 28px; }
 .section-header h2 {
@@ -229,7 +247,7 @@ html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; backgr
 }
 .section-header p { font-size: 0.85rem; color: var(--text-light); margin-top: 4px; }
 
-/* Saudação */
+/* Saudação do usuário */
 .greeting {
   font-family: 'Outfit', sans-serif;
   font-size: 1.45rem; font-weight: 600;
@@ -238,9 +256,8 @@ html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; backgr
 }
 
 /* ============================================================
-   CARDS DE SUMÁRIO
+   6. CARDS DE RESUMO (Saldo, Entradas e Saídas)
    ============================================================ */
-
 .summary-cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -278,9 +295,8 @@ html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; backgr
 .summary-card-value.saida   { color: var(--saida); }
 
 /* ============================================================
-   TOOLBAR (filtros + botões)
+   7. BARRA DE FERRAMENTAS (TOOLBAR)
    ============================================================ */
-
 .toolbar {
   display: flex;
   align-items: center;
@@ -379,9 +395,8 @@ html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; backgr
 }
 
 /* ============================================================
-   TABELA
+   8. TABELA DE DADOS (DATA TABLE)
    ============================================================ */
-
 .table-wrap {
   background: var(--table-bg);
   border-radius: var(--radius);
@@ -460,7 +475,7 @@ html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; backgr
   font-size: 0.88rem;
 }
 
-/* Ações */
+/* Ações por linha (Editar / Excluir) */
 .actions-cell { white-space: nowrap; }
 .action-btn {
   width: 32px; height: 32px;
@@ -476,9 +491,8 @@ html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; backgr
 .delete-btn:hover { background: rgba(231,76,60,0.1);  color: var(--saida); }
 
 /* ============================================================
-   PAGINAÇÃO
+   9. BARRA DE PAGINAÇÃO
    ============================================================ */
-
 .pagination-bar {
   display: flex;
   align-items: center;
@@ -522,171 +536,99 @@ html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; backgr
 .page-nav-btn svg { width: 14px; height: 14px; }
 
 /* ============================================================
-   MODAIS
+   10. MODAIS — Customização sobre Bootstrap 5
    ============================================================ */
 
-.modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.55);
+/* Fundo com efeito blur */
+.modal-backdrop.show {
   backdrop-filter: blur(6px);
-  z-index: 500;
-  display: flex; align-items: center; justify-content: center;
-  padding: 20px;
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.25s ease;
-}
-.modal-overlay.open {
-  opacity: 1; pointer-events: auto;
-}
-.modal-overlay.open .modal-box {
-  transform: scale(1) translateY(0);
-  opacity: 1;
+  -webkit-backdrop-filter: blur(6px);
 }
 
-.modal-box {
+/* Card do Modal */
+.modal-content {
   background: #f5ede0;
-  border-radius: var(--radius);
+  border: none;
+  border-radius: var(--radius) !important;
   box-shadow: var(--shadow-modal);
-  width: 100%;
-  max-width: 480px;
-  transform: scale(0.95) translateY(20px);
-  opacity: 0;
-  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.25s ease;
   overflow: hidden;
 }
-.modal-box.wide { max-width: 560px; }
 
+/* Cabeçalho do Modal */
 .modal-header {
-  padding: 22px 26px 0;
-  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  border-bottom: none;
+  padding: 18px 24px;
 }
-.modal-header h3 {
+.modal-header .modal-title {
   font-family: 'Outfit', sans-serif;
-  font-size: 1.1rem; font-weight: 700;
-  color: var(--text-dark);
+  font-size: 1.05rem; font-weight: 700;
+  color: var(--text-light);
 }
-.modal-close {
-  width: 30px; height: 30px;
-  border-radius: 8px;
-  border: none; background: rgba(0,0,0,0.07);
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--text-medium);
-  transition: var(--transition);
+.modal-header .btn-close {
+  filter: invert(1) grayscale(1) brightness(2);
+  opacity: 0.7;
 }
-.modal-close:hover { background: rgba(0,0,0,0.13); color: var(--text-dark); }
-.modal-close svg { width: 16px; height: 16px; }
+.modal-header .btn-close:hover { opacity: 1; }
 
-.modal-body { padding: 20px 26px; }
+.modal-body {
+  padding: 24px;
+}
+
 .modal-footer {
-  padding: 14px 26px 22px;
-  display: flex; gap: 10px; justify-content: flex-end;
+  padding: 14px 24px 20px;
+  border-top: 1px solid rgba(139,110,82,0.15);
+  background: rgba(245,237,224,0.6);
 }
 
-/* Form no modal */
-.modal-form-group { margin-bottom: 16px; }
-.modal-form-group label {
-  display: block;
-  font-size: 0.78rem; font-weight: 500;
-  color: var(--text-medium);
-  margin-bottom: 6px;
-  letter-spacing: 0.2px;
-}
-.modal-input {
-  width: 100%;
-  padding: 10px 13px;
-  border: 1px solid rgba(139,110,82,0.3);
-  border-radius: var(--radius-sm);
+/* Formulários dentro dos modais */
+.modal .form-control,
+.modal .form-select {
+  border-color: rgba(139,110,82,0.3);
   font-family: 'Inter', sans-serif;
   font-size: 0.88rem;
   color: var(--text-dark);
   background: #fff;
-  outline: none;
-  transition: var(--transition);
 }
-.modal-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(107,76,53,0.1);
+.modal .form-control:focus,
+.modal .form-select:focus {
+  border-color: var(--accent-hover);
+  box-shadow: 0 0 0 3px rgba(112,28,28,0.12);
+}
+.modal .form-label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-medium);
+  margin-bottom: 6px;
+  letter-spacing: 0.2px;
 }
 
-.modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-
-.btn-modal-primary {
-  padding: 10px 22px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-  color: #fff;
-  border: none; border-radius: var(--radius-sm);
-  font-family: 'Inter', sans-serif;
-  font-size: 0.88rem; font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
-  box-shadow: 0 4px 12px rgba(107,76,53,0.3);
-  min-width: 80px;
-}
-.btn-modal-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
-.btn-modal-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
+/* Botão com gradiente da marca */
 .btn-gradient {
   background: linear-gradient(135deg, var(--accent), var(--accent-hover));
   color: #fff;
   font-family: 'Inter', sans-serif;
   transition: var(--transition);
   box-shadow: 0 4px 12px rgba(105,75,50,0.5);
-  border:none;
+  border: none;
 }
-
 .btn-gradient:hover {
   filter: brightness(1.1);
   color: #fff;
   box-shadow: 0 6px 18px rgba(105,75,50,0.5);
 }
-
-.btn-gradient:active { 
+.btn-gradient:active,
+.btn-gradient:focus {
   color: #fff !important;
 }
 
-
-.btn-modal-secondary {
-  padding: 10px 22px;
-  background: rgba(0,0,0,0.07);
-  color: var(--text-medium);
-  border: 1px solid rgba(0,0,0,0.1);
-  border-radius: var(--radius-sm);
-  font-family: 'Inter', sans-serif;
-  font-size: 0.88rem; font-weight: 500;
-  cursor: pointer;
-  transition: var(--transition);
-}
-.btn-modal-secondary:hover { background: rgba(0,0,0,0.12); color: var(--text-dark); }
-
-.btn-modal-danger {
-  padding: 10px 22px;
-  background: rgba(231,76,60,0.1);
-  color: #c0392b;
-  border: 1px solid rgba(231,76,60,0.25);
-  border-radius: var(--radius-sm);
-  font-family: 'Inter', sans-serif;
-  font-size: 0.88rem; font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
-}
-.btn-modal-danger:hover { background: rgba(231,76,60,0.18); }
-
-/* Divider no modal de categoria */
-.modal-divider {
-  height: 1px;
-  background: rgba(139,110,82,0.2);
+/* Divisor interno do modal */
+.modal-body hr {
+  border-color: rgba(139,110,82,0.2);
   margin: 16px 0;
 }
-.modal-subtitle {
-  font-size: 0.78rem; font-weight: 600;
-  color: var(--text-medium);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 10px;
-}
 
-/* Lista de categorias no modal */
+/* Lista de Categorias no Modal */
 .cat-list { display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; }
 .cat-list-item {
   display: flex; align-items: center; gap: 10px;
@@ -708,27 +650,16 @@ html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; backgr
 }
 .cat-delete-btn:hover { opacity: 1; background: rgba(231,76,60,0.1); }
 
-/* Color input wrapper */
-.color-row { display: flex; align-items: center; gap: 10px; }
-.color-row input[type="color"] {
-  width: 38px; height: 38px;
-  border: none; border-radius: 8px;
-  padding: 2px; cursor: pointer;
-  background: none;
-}
-.color-row input[type="text"] { flex: 1; }
-
 /* ============================================================
-   SEÇÃO RELATÓRIOS
+   11. SEÇÃO DE RELATÓRIOS (GRÁFICOS E TABELAS)
    ============================================================ */
-
 .reports-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-    gap: 20px;
-    width: 100%;
-    min-width: 0;
-    margin-bottom: 24px;
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 20px;
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 24px;
 }
 
 .report-card {
@@ -749,6 +680,7 @@ html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; backgr
 
 .chart-wrap { position: relative; height: 280px; }
 
+/* Mensagem de estado vazio no gráfico de pizza */
 .pie-no-data {
   position: absolute; inset: 0;
   display: none;
@@ -758,7 +690,7 @@ html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; backgr
 }
 .pie-no-data svg { width: 36px; height: 36px; opacity: 0.3; }
 
-/* Toolbar de relatórios */
+/* Toolbar de Relatórios (Filtro de Ano) */
 .reports-toolbar {
   display: flex; align-items: center; gap: 14px;
   margin-bottom: 24px;
@@ -774,7 +706,6 @@ html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; backgr
   outline: none; cursor: pointer; appearance: none;
 }
 
-/* Spinner de relatórios */
 .reports-spinner {
   display: none;
   align-items: center; justify-content: center;
@@ -782,7 +713,7 @@ html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; backgr
   color: var(--text-light); font-size: 0.88rem;
 }
 
-/* Tabela de histórico */
+/* Tabela de Histórico Mensal */
 .history-table-wrap {
   background: rgba(255,255,255,0.2);
   backdrop-filter: blur(12px);
@@ -804,7 +735,7 @@ html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; backgr
   width: 100%; border-collapse: collapse; font-size: 0.86rem;
 }
 
-.history-table thead, .history-table thead tr { /* Coluna da tabela*/
+.history-table thead, .history-table thead tr {
   background: linear-gradient(135deg, var(--accent), var(--accent-hover));
 }
 
@@ -821,15 +752,14 @@ html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; backgr
 
 .history-table tbody tr { border-bottom: 1px solid rgba(139,110,82,0.25); }
 .history-table tbody tr.row-empty { opacity: 0.5; }
-.history-table td { padding: 10px 22px; color: var(--text-light); } /* Cor dos meses da tabela */
+.history-table td { padding: 10px 22px; color: var(--text-light); }
 .history-table td.entrada { color: var(--entrada); font-weight: 400; }
 .history-table td.saida   { color: var(--saida);   font-weight: 400; }
 .history-table td.bold    { font-weight: 600; }
 
 /* ============================================================
-   SEÇÃO CONFIGURAÇÕES
+   12. SEÇÃO DE CONFIGURAÇÕES (PERFIL E PREFERÊNCIAS)
    ============================================================ */
-
 .settings-card {
   background: rgba(255,255,255,0.75);
   backdrop-filter: blur(12px);
@@ -962,9 +892,8 @@ html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; backgr
 .btn-logout-settings svg { width: 16px; height: 16px; }
 
 /* ============================================================
-   SPINNER GLOBAL
+   13. SPINNERS & ALERTAS GLOBAIS
    ============================================================ */
-
 .spinner {
   width: 16px; height: 16px;
   border: 2px solid rgba(0,0,0,0.15);
@@ -980,7 +909,6 @@ html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; backgr
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Alert no settings */
 .alert-msg {
   padding: 10px 14px;
   border-radius: var(--radius-sm);
@@ -992,16 +920,84 @@ html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; backgr
 .alert-msg.info    { display:block; background:rgba(107,76,53,0.1);  border:1px solid rgba(107,76,53,0.25); color:var(--accent); }
 
 /* ============================================================
-   RESPONSIVIDADE
+   14. COMPONENTES MOBILE (TOPBAR & OVERLAY)
    ============================================================ */
 
+/* Fundo semitransparente com blur ao abrir menu no mobile */
+.sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 99;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.sidebar-overlay.active {
+  opacity: 1;
+}
+
+/* Barra superior fixa exclusiva de telas menores */
+.mobile-topbar {
+  display: none;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background: var(--sidebar-bg);
+  border-bottom: 1px solid var(--sidebar-border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.hamburger-btn {
+  width: 38px; height: 38px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--sidebar-border);
+  background: rgba(255,255,255,0.06);
+  color: var(--text-light);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+.hamburger-btn:hover {
+  background: var(--sidebar-hover);
+  border-color: rgba(255,255,255,0.2);
+}
+.hamburger-btn svg { width: 20px; height: 20px; }
+
+.mobile-logo {
+  display: flex; align-items: center; gap: 10px;
+}
+.mobile-logo-icon {
+  width: 30px; height: 30px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.mobile-logo-icon svg { width: 16px; height: 16px; color: #fff; }
+.mobile-logo span {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.05rem; font-weight: 700;
+  color: var(--text-light);
+  letter-spacing: -0.3px;
+}
+
+/* ============================================================
+   15. REGRAS DE RESPONSIVIDADE (MEDIA QUERIES)
+   ============================================================ */
+
+/* Telas médias (Tablets / Laptops compactos <= 900px) */
 @media (max-width: 900px) {
   .summary-cards { grid-template-columns: 1fr 1fr; }
   .reports-grid  { grid-template-columns: 1fr; }
   .section       { padding: 24px 22px; }
-  .modal-row     { grid-template-columns: 1fr; }
 }
 
+/* Telas intermediárias (<= 700px) */
 @media (max-width: 700px) {
   :root { --sidebar-w: 220px; }
   .summary-cards { grid-template-columns: 1fr; }
@@ -1009,8 +1005,18 @@ html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; backgr
   .search-wrap   { max-width: 100%; }
 }
 
+/* Telas mobile (Smartphones <= 560px) */
 @media (max-width: 560px) {
-  .sidebar { position: fixed; left: -100%; transition: left 0.3s ease; }
+  /* Transforma a sidebar em gaveta escondida à esquerda */
+  .sidebar {
+    position: fixed;
+    left: -100%;
+    top: 0; bottom: 0;
+    z-index: 200;
+    transition: left 0.3s ease;
+  }
   .sidebar.open { left: 0; }
   .main-area { width: 100%; }
+  .mobile-topbar { display: flex; }
+  .sidebar-overlay.active { display: block; }
 }

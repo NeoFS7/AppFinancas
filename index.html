@@ -6,16 +6,21 @@
   <title>FinApp | Entrar</title>
   <meta name="description" content="Gerencie suas finanças pessoais com facilidade. Faça login ou crie sua conta no FinApp." />
   <link rel="shortcut icon" href="favicon-16x16.png" type="image/x-icon">
+  <!-- Folha de estilo visual exclusiva da tela de autenticação -->
   <link rel="stylesheet" href="css/auth.css" />
 </head>
 <body>
 
+<!-- Efeito de fundo decorativo com gradientes radiais -->
 <div class="auth-bg"></div>
 
+<!-- Container centralizado que envolve o card -->
 <div class="auth-wrapper">
   <div class="auth-card">
 
-    <!-- Logo -->
+    <!-- ============================================================
+         1. CABEÇALHO / LOGO DO APLICATIVO
+         ============================================================ -->
     <div class="auth-logo">
       <div class="auth-logo-icon">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
@@ -27,16 +32,20 @@
       <p>Controle financeiro inteligente</p>
     </div>
 
-    <!-- Tabs Login / Cadastro -->
+    <!-- ============================================================
+         2. ABAS DE NAVEGAÇÃO: ENTRAR / CRIAR CONTA
+         ============================================================ -->
     <div class="auth-tabs" id="authTabs">
       <button class="auth-tab-btn active" id="tabLogin" onclick="switchTab('login')">Entrar</button>
       <button class="auth-tab-btn" id="tabSignup" onclick="switchTab('signup')">Criar Conta</button>
     </div>
 
-    <!-- Alert global -->
+    <!-- Mensagens globais de feedback (Erro, Sucesso, Info) -->
     <div class="alert-msg" id="alertMsg"></div>
 
-    <!-- ============ VIEW: LOGIN ============ -->
+    <!-- ============================================================
+         3. VIEW: FORMULÁRIO DE LOGIN
+         ============================================================ -->
     <div class="auth-view active" id="viewLogin">
       <h2>Bem-vindo de volta!</h2>
       <p class="subtitle">Acesse sua conta para continuar.</p>
@@ -64,7 +73,9 @@
       </div>
     </div>
 
-    <!-- ============ VIEW: CADASTRO ============ -->
+    <!-- ============================================================
+         4. VIEW: FORMULÁRIO DE CADASTRO
+         ============================================================ -->
     <div class="auth-view" id="viewSignup">
       <h2>Criar conta</h2>
       <p class="subtitle">Preencha os dados abaixo para começar.</p>
@@ -81,6 +92,7 @@
         <div class="form-group">
           <label for="signupPassword">Senha</label>
           <input class="form-input" type="password" id="signupPassword" placeholder="Mínimo 6 caracteres" autocomplete="new-password" required />
+          <!-- Barra de força da senha em tempo real -->
           <div class="pwd-strength" id="pwdStrength">
             <div class="pwd-strength-bar"><div class="pwd-strength-fill" id="pwdFill"></div></div>
             <div class="pwd-strength-label" id="pwdLabel"></div>
@@ -100,7 +112,9 @@
       </div>
     </div>
 
-    <!-- ============ VIEW: RESET DE SENHA ============ -->
+    <!-- ============================================================
+         5. VIEW: RECUPERAÇÃO DE SENHA (Enviar e-mail)
+         ============================================================ -->
     <div class="auth-view" id="viewReset">
       <h2>Redefinir senha</h2>
       <p class="subtitle">Digite seu e-mail e enviaremos um link para criar uma nova senha.</p>
@@ -118,7 +132,9 @@
       </div>
     </div>
 
-    <!-- ============ VIEW: NOVA SENHA (vindo do link do e-mail) ============ -->
+    <!-- ============================================================
+         6. VIEW: NOVA SENHA (Redefinição final após link de e-mail)
+         ============================================================ -->
     <div class="auth-view" id="viewNewPwd">
       <h2>Nova senha</h2>
       <p class="subtitle">Digite e confirme sua nova senha.</p>
@@ -127,6 +143,7 @@
         <div class="form-group">
           <label for="newPwd">Nova senha</label>
           <input class="form-input" type="password" id="newPwd" placeholder="Mínimo 6 caracteres" required />
+          <!-- Barra de força da nova senha -->
           <div class="pwd-strength" id="pwdStrength2">
             <div class="pwd-strength-bar"><div class="pwd-strength-fill" id="pwdFill2"></div></div>
             <div class="pwd-strength-label" id="pwdLabel2"></div>
@@ -143,6 +160,7 @@
   </div><!-- /auth-card -->
 </div><!-- /auth-wrapper -->
 
+<!-- Módulo de autenticação JavaScript -->
 <script type="module" src="js/auth.js"></script>
 
 </body>

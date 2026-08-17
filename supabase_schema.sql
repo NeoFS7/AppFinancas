@@ -1,16 +1,32 @@
 -- ============================================================
--- SCHEMA DO BANCO DE DADOS — FinApp
+-- SCHEMA DO BANCO DE DADOS — FinApp (Supabase / PostgreSQL)
+-- ------------------------------------------------------------
+-- Este script define a estrutura completa de dados do aplicativo:
+-- 1. Tabela 'profiles' (dados públicos do usuário: nome, avatar)
+-- 2. Trigger automático de criação de perfil ao cadastrar novo usuário
+-- 3. Tabela 'categories' (categorias personalizadas com cor)
+-- 4. Tabela 'entries' (lançamentos de receitas e despesas)
+-- 5. Políticas de Segurança em Nível de Linha (RLS - Row Level Security)
+-- 6. Índices de performance para consultas rápidas
+-- 7. Políticas de segurança do Storage (Bucket de Avatars)
 -- ============================================================
 
--- 1. Tabela de perfis de usuário
+-- ============================================================
+-- 1. TABELA DE PERFIS (profiles)
+-- ============================================================
+-- Armazena dados complementares do usuário vinculado ao auth.users.
 create table if not exists profiles (
-  id         uuid references auth.users on delete cascade primary key,
-  name       text not null default '',
-  avatar_url text,
-  created_at timestamptz default now()
+  id         uuid references auth.users on delete cascade primary key, -- Chave primária ligada ao ID de autenticação
+  name       text not null default '',                                 -- Nome completo do usuário
+  avatar_url text,                                                     -- URL pública da foto de perfil
+  created_at timestamptz default now()                                 -- Data de criação do registro
 );
 
--- 2. Trigger: cria perfil automaticamente ao cadastrar usuário
+-- ============================================================
+-- 2. TRIGGER: CRIAÇÃO AUTOMÁTICA DE PERFIL
+-- ============================================================
+-- Função acionada automaticamente sempre que uma nova conta é criada no auth.users,
+-- extraindo o nome enviado nos metadados de cadastro e inserindo na tabela profiles.
 create or replace function handle_new_user()
 returns trigger
 language plpgsql
@@ -26,42 +42,49 @@ begin
 end;
 $$;
 
+-- Vincula a trigger à tabela interna auth.users
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure handle_new_user();
 
--- 3. Tabela de categorias
+-- ============================================================
+-- 3. TABELA DE CATEGORIAS (categories)
+-- ============================================================
+-- Permite que cada usuário crie suas próprias categorias de gastos/ganhos.
 create table if not exists categories (
   id         uuid default gen_random_uuid() primary key,
-  user_id    uuid references auth.users on delete cascade not null,
-  name       text not null,
-  color      text not null default '#8b6e52',
+  user_id    uuid references auth.users on delete cascade not null, -- Dono da categoria
+  name       text not null,                                         -- Nome da categoria (ex: Alimentação, Salário)
+  color      text not null default '#8b6e52',                       -- Cor em hexadecimal para tags e gráficos
   created_at timestamptz default now()
 );
 
--- 4. Tabela de entradas financeiras
+-- ============================================================
+-- 4. TABELA DE ENTRADAS FINANCEIRAS (entries)
+-- ============================================================
+-- Registra cada lançamento financeiro individual (receita ou despesa).
 create table if not exists entries (
   id          uuid default gen_random_uuid() primary key,
-  user_id     uuid references auth.users on delete cascade not null,
-  date        date not null default current_date,
-  description text default '',
-  category_id uuid references categories(id) on delete set null,
-  value       numeric(12,2) not null default 0,
-  type        text check (type in ('entrada','saida')) not null,
+  user_id     uuid references auth.users on delete cascade not null,     -- Dono do lançamento
+  date        date not null default current_date,                        -- Data do lançamento
+  description text default '',                                           -- Descrição detalhada
+  category_id uuid references categories(id) on delete set null,         -- Vínculo opcional com categoria
+  value       numeric(12,2) not null default 0,                          -- Valor monetário (positivo)
+  type        text check (type in ('entrada','saida')) not null,         -- Tipo: 'entrada' (ganho) ou 'saida' (gasto)
   created_at  timestamptz default now()
 );
 
 -- ============================================================
--- ROW LEVEL SECURITY (RLS)
--- Cada usuário acessa apenas os seus próprios dados
+-- 5. ROW LEVEL SECURITY (RLS) — Isolamento de Dados por Usuário
 -- ============================================================
+-- Garante que um usuário NUNCA consiga visualizar, editar ou excluir dados de outros usuários.
 
 alter table profiles   enable row level security;
 alter table categories enable row level security;
 alter table entries    enable row level security;
 
--- Policies para profiles
+-- Políticas para a tabela PROFILES (apenas o próprio usuário pode ler, criar e alterar seu perfil)
 drop policy if exists "user own profile select" on profiles;
 drop policy if exists "user own profile insert" on profiles;
 drop policy if exists "user own profile update" on profiles;
@@ -73,49 +96,49 @@ create policy "user own profile insert" on profiles
 create policy "user own profile update" on profiles
   for update using (auth.uid() = id);
 
--- Policies para categories
+-- Políticas para a tabela CATEGORIES (operações permitidas apenas onde user_id coincide com o usuário logado)
 drop policy if exists "user own categories" on categories;
 create policy "user own categories" on categories
   for all using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
--- Policies para entries
+-- Políticas para a tabela ENTRIES (operações permitidas apenas onde user_id coincide com o usuário logado)
 drop policy if exists "user own entries" on entries;
 create policy "user own entries" on entries
   for all using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
 -- ============================================================
--- Índices de performance
+-- 6. ÍNDICES DE PERFORMANCE
 -- ============================================================
+-- Aceleram filtros comuns por usuário e ordenações por data.
 create index if not exists idx_entries_user_id   on entries(user_id);
 create index if not exists idx_entries_date       on entries(date desc);
 create index if not exists idx_categories_user_id on categories(user_id);
 
 -- ============================================================
--- STORAGE RLS (Fotos de Perfil)
--- Permite que usuários enviem e editem suas próprias fotos
+-- 7. STORAGE RLS (Bucket 'avatars' para Fotos de Perfil)
 -- ============================================================
+-- Controla permissões de upload, visualização, edição e exclusão de arquivos.
 
--- Garante que as políticas de Storage estejam habilitadas
 alter table storage.objects enable row level security;
 
--- Política para visualizar imagens (o bucket é público, mas garante leitura via DB)
+-- Visualização pública de imagens do bucket avatars
 create policy "Avatar images are publicly accessible" 
   on storage.objects for select 
   using ( bucket_id = 'avatars' );
 
--- Política para fazer upload da própria imagem
+-- Upload permitido apenas na subpasta correspondente ao ID do próprio usuário (ex: <user_id>/avatar.png)
 create policy "Users can upload their own avatar" 
   on storage.objects for insert 
   with check ( bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1] );
 
--- Política para atualizar a própria imagem
+-- Atualização permitida apenas no próprio avatar
 create policy "Users can update their own avatar" 
   on storage.objects for update 
   using ( bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1] );
 
--- Política para excluir a própria imagem
+-- Exclusão permitida apenas do próprio avatar
 create policy "Users can delete their own avatar" 
   on storage.objects for delete 
   using ( bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1] );

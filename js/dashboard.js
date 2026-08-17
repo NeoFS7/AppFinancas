@@ -1,5 +1,15 @@
 // ============================================================
-// DASHBOARD.JS — Painel de Finanças (com Bootstrap 5 Modals)
+// DASHBOARD.JS — Painel Principal de Finanças
+// ------------------------------------------------------------
+// Responsável por toda a lógica da aba "Painel de Finanças":
+// 1. Gerenciamento do estado local (filtros, busca, paginação)
+// 2. Formatação de valores (Moeda BRL e Datas)
+// 3. Integração com Bootstrap 5 Modals
+// 4. Cards de resumo (Saldo, Total Entradas, Total Saídas)
+// 5. Tabela de lançamentos e paginação
+// 6. Modal de Nova / Editar Entrada
+// 7. Modal de Gerenciamento de Categorias
+// 8. Modal de Confirmação de Exclusão
 // ============================================================
 
 import {
@@ -8,47 +18,70 @@ import {
   getSummary,
 } from './data.js';
 
-// ── Estado ────────────────────────────────────────────────
+// ============================================================
+// 1. ESTADO LOCAL DO DASHBOARD
+// ============================================================
 
 const state = {
-  page: 1,
-  perPage: 10,
-  search: '',
-  categoryId: '',
-  type: 'all',
-  categories: [],
-  totalCount: 0,
-  editingId: null,
+  page: 1,           // Página atual na tabela
+  perPage: 10,       // Quantidade de registros por página
+  search: '',        // Termo de pesquisa na descrição
+  categoryId: '',    // Categoria filtrada (vazio = todas)
+  type: 'all',       // Tipo filtrado: 'all', 'entrada' ou 'saida'
+  categories: [],    // Lista de categorias carregadas em memória
+  totalCount: 0,     // Total de registros encontrados no banco
+  editingId: null,   // ID da entrada em edição (null = criando nova)
 };
 
-// ── Formatação ─────────────────────────────────────────────
+// ============================================================
+// 2. FUNÇÕES DE FORMATAÇÃO
+// ============================================================
 
+/**
+ * Converte um número float para o formato de moeda brasileiro (Ex: R$ 1.250,50).
+ */
 export function formatCurrency(value) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 }
 
+/**
+ * Converte data ISO (YYYY-MM-DD) para formato legível (DD/MM/YYYY).
+ */
 function formatDate(dateStr) {
   if (!dateStr) return '—';
   const [y, m, d] = dateStr.split('-');
   return `${d}/${m}/${y}`;
 }
 
-// ── Bootstrap Modal helpers ────────────────────────────────
+// ============================================================
+// 3. HELPERS PARA MODAIS DO BOOTSTRAP 5
+// ============================================================
 
+/**
+ * Abre um modal Bootstrap pelo ID do elemento HTML.
+ */
 function openBsModal(id) {
   const el = document.getElementById(id);
   if (!el) return;
   bootstrap.Modal.getOrCreateInstance(el).show();
 }
 
+/**
+ * Fecha um modal Bootstrap pelo ID do elemento HTML.
+ */
 function closeBsModal(id) {
   const el = document.getElementById(id);
   if (!el) return;
   bootstrap.Modal.getOrCreateInstance(el).hide();
 }
 
-// ── Inicialização ──────────────────────────────────────────
+// ============================================================
+// 4. INICIALIZAÇÃO DO DASHBOARD
+// ============================================================
 
+/**
+ * Chamada quando a aba "Painel de Finanças" é ativada pela primeira vez.
+ */
 export async function initDashboard() {
   await loadCategories();
   setupFilters();
@@ -57,18 +90,28 @@ export async function initDashboard() {
   await refreshAll();
 }
 
+/**
+ * Recarrega tanto os cards de sumário quanto a tabela de dados.
+ */
 async function refreshAll() {
   await Promise.all([loadSummary(), loadEntries()]);
 }
 
-// ── Sumário (Cards) ────────────────────────────────────────
+// ============================================================
+// 5. CARDS DE RESUMO (Saldo, Entradas e Saídas)
+// ============================================================
 
+/**
+ * Busca os totais agregados e atualiza o texto e as cores dos cards no topo.
+ */
 async function loadSummary() {
   try {
     const { totalEntradas, totalSaidas, saldo } = await getSummary();
     document.getElementById('cardSaldo').textContent    = formatCurrency(saldo);
     document.getElementById('cardEntradas').textContent = formatCurrency(totalEntradas);
     document.getElementById('cardSaidas').textContent   = formatCurrency(totalSaidas);
+
+    // Ajusta a cor do saldo (verde se positivo/zero, vermelho se negativo)
     const saldoEl = document.getElementById('cardSaldo');
     saldoEl.style.color = saldo >= 0 ? 'var(--entrada)' : 'var(--saida)';
   } catch (err) {
@@ -76,22 +119,33 @@ async function loadSummary() {
   }
 }
 
-// ── Categorias ─────────────────────────────────────────────
+// ============================================================
+// 6. GESTÃO DE CATEGORIAS EM MEMÓRIA
+// ============================================================
 
+/**
+ * Carrega a lista de categorias do banco e popula os selects de filtro e de formulário.
+ */
 async function loadCategories() {
   state.categories = await getCategories();
   populateCategoryFilter();
   populateCategorySelect();
 }
 
+/**
+ * Preenche o select de filtro na toolbar da tabela.
+ */
 function populateCategoryFilter() {
   const sel = document.getElementById('filterCategory');
   if (!sel) return;
-  sel.innerHTML = `<option value="">Todas</option>` +
+  sel.innerHTML = `<option value="">Todas as categorias</option>` +
     state.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
   sel.value = state.categoryId;
 }
 
+/**
+ * Preenche o select de categoria dentro do formulário de criação/edição de entrada.
+ */
 function populateCategorySelect() {
   const sel = document.getElementById('entryCategory');
   if (!sel) return;
@@ -99,8 +153,13 @@ function populateCategorySelect() {
     state.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
 }
 
-// ── Tabela de entradas ─────────────────────────────────────
+// ============================================================
+// 7. TABELA DE ENTRADAS & PAGINAÇÃO
+// ============================================================
 
+/**
+ * Executa a busca paginada no banco com base nos filtros ativos e renderiza o HTML.
+ */
 async function loadEntries() {
   const tbody = document.getElementById('entriesBody');
   if (!tbody) return;
@@ -126,6 +185,9 @@ async function loadEntries() {
   }
 }
 
+/**
+ * Constrói as linhas (TRs) da tabela a partir dos dados recebidos.
+ */
 function renderTable(entries) {
   const tbody = document.getElementById('entriesBody');
   if (!entries.length) {
@@ -155,8 +217,9 @@ function renderTable(entries) {
   `).join('');
 }
 
-// ── Paginação ──────────────────────────────────────────────
-
+/**
+ * Atualiza o rodapé de paginação (texto "X–Y de Z" e estado dos botões Anterior/Próximo).
+ */
 function renderPagination() {
   const totalPages = Math.ceil(state.totalCount / state.perPage) || 1;
   const from = state.totalCount === 0 ? 0 : (state.page - 1) * state.perPage + 1;
@@ -170,7 +233,9 @@ function renderPagination() {
   if (sel) sel.value = state.perPage;
 }
 
-// ── Filtros ────────────────────────────────────────────────
+// ============================================================
+// 8. CONFIGURAÇÃO DE EVENTOS DE FILTROS E BUSCA
+// ============================================================
 
 function setupFilters() {
   const searchInput   = document.getElementById('searchInput');
@@ -180,27 +245,37 @@ function setupFilters() {
   const btnPrev       = document.getElementById('btnPrevPage');
   const btnNext       = document.getElementById('btnNextPage');
 
+  // Debounce de 350ms para não fazer query a cada letra digitada
   let searchTimer;
   searchInput?.addEventListener('input', e => {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => { state.search = e.target.value; state.page = 1; loadEntries(); }, 350);
   });
+
+  // Filtros imediatos
   filterCat?.addEventListener('change',     e => { state.categoryId = e.target.value; state.page = 1; loadEntries(); });
   filterType?.addEventListener('change',    e => { state.type = e.target.value; state.page = 1; loadEntries(); });
   perPageSelect?.addEventListener('change', e => { state.perPage = parseInt(e.target.value); state.page = 1; loadEntries(); });
+
+  // Botões de navegação de páginas
   btnPrev?.addEventListener('click', () => { if (state.page > 1) { state.page--; loadEntries(); } });
   btnNext?.addEventListener('click', () => {
     if (state.page < Math.ceil(state.totalCount / state.perPage)) { state.page++; loadEntries(); }
   });
 }
 
-// ── Modal de Entrada ───────────────────────────────────────
+// ============================================================
+// 9. MODAL: NOVA OU EDITAR ENTRADA
+// ============================================================
 
 function setupEntryModal() {
   document.getElementById('btnNewEntry')?.addEventListener('click', () => openNewEntry());
   document.getElementById('entryForm')?.addEventListener('submit', handleEntrySave);
 }
 
+/**
+ * Prepara o formulário para criar um novo registro (limpa campos e define data atual).
+ */
 window.openNewEntry = function () {
   state.editingId = null;
 
@@ -214,6 +289,9 @@ window.openNewEntry = function () {
   openBsModal('entryModal');
 };
 
+/**
+ * Abre o modal preenchendo os dados do item selecionado para edição.
+ */
 window.openEditEntry = async function (id) {
   state.editingId = id;
 
@@ -236,6 +314,9 @@ window.openEditEntry = async function (id) {
   openBsModal('entryModal');
 };
 
+/**
+ * Salva a entrada (cria se editingId for nulo, ou atualiza se existir ID).
+ */
 async function handleEntrySave(e) {
   e.preventDefault();
   const payload = {
@@ -248,10 +329,10 @@ async function handleEntrySave(e) {
   if (!payload.date || !payload.value || !payload.type) return;
 
   const btn = document.getElementById('btnSaveEntry');
-const original = btn.innerHTML;
+  const original = btn.innerHTML;
 
-btn.disabled = true;
-btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Salvando';
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Salvando';
 
   try {
     if (state.editingId) {
@@ -269,7 +350,9 @@ btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="statu
   }
 }
 
-// ── Modal de Categoria ─────────────────────────────────────
+// ============================================================
+// 10. MODAL: GERENCIAR CATEGORIAS
+// ============================================================
 
 function setupCategoryModal() {
   document.getElementById('btnNewCategory')?.addEventListener('click', openCategoryModal);
@@ -283,6 +366,9 @@ function openCategoryModal() {
   openBsModal('categoryModal');
 }
 
+/**
+ * Renderiza a lista de categorias existentes dentro do modal de gerenciamento.
+ */
 async function renderCategoryList() {
   const list = document.getElementById('categoryList');
   if (!list) return;
@@ -297,6 +383,9 @@ async function renderCategoryList() {
   `).join('') || '<p class="text-muted small mb-0">Nenhuma categoria ainda.</p>';
 }
 
+/**
+ * Cria uma nova categoria e atualiza a interface.
+ */
 async function handleCategorySave(e) {
   e.preventDefault();
   const name  = document.getElementById('categoryName').value.trim();
@@ -314,6 +403,9 @@ async function handleCategorySave(e) {
   }
 }
 
+/**
+ * Solicita confirmação antes de apagar uma categoria.
+ */
 window.confirmDeleteCategory = function (id, name) {
   openConfirmModal(
     `Excluir categoria "${name}"?`,
@@ -329,7 +421,9 @@ window.confirmDeleteCategory = function (id, name) {
   );
 };
 
-// ── Excluir Entrada ────────────────────────────────────────
+// ============================================================
+// 11. MODAL: EXCLUSÃO DE ENTRADA FINANCEIRA
+// ============================================================
 
 window.confirmDeleteEntry = function (id) {
   openConfirmModal(
@@ -344,10 +438,15 @@ window.confirmDeleteEntry = function (id) {
   );
 };
 
-// ── Modal de Confirmação ───────────────────────────────────
+// ============================================================
+// 12. MODAL GENÉRICO DE CONFIRMAÇÃO
+// ============================================================
 
 let confirmCallback = null;
 
+/**
+ * Abre o modal de confirmação recebendo um título, texto explicativo e a função callback.
+ */
 function openConfirmModal(title, msg, cb) {
   document.getElementById('confirmTitle').textContent = title;
   document.getElementById('confirmMsg').textContent   = msg;
@@ -355,6 +454,7 @@ function openConfirmModal(title, msg, cb) {
   openBsModal('confirmModal');
 }
 
+// Ações dos botões do modal de confirmação
 window._dashConfirm = function () {
   closeBsModal('confirmModal');
   confirmCallback?.();

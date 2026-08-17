@@ -1,35 +1,54 @@
 // ============================================================
-// REPORTS.JS — Relatórios mensais com Chart.js
+// REPORTS.JS — Relatórios Financeiros e Gráficos (Chart.js)
+// ------------------------------------------------------------
+// Responsável por renderizar os dados anuais:
+// 1. Inicialização e seletor de ano
+// 2. Gráfico de Barras: Comparativo mensal Entradas x Saídas
+// 3. Gráfico de Rosca (Donut): Distribuição de saídas por categoria
+// 4. Tabela de Histórico Mensal consolidada
 // ============================================================
 
 import { getEntriesByMonth } from './data.js';
 import { formatCurrency } from './dashboard.js';
 
+// Nomes dos meses para labels curtos e completos
 const MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 const MONTHS_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
+// Instâncias ativas dos gráficos do Chart.js para permitir destruição e re-renderização
 let barChart = null;
 let pieChart = null;
 
+// ============================================================
+// 1. INICIALIZAÇÃO DA ABA DE RELATÓRIOS
+// ============================================================
+
+/**
+ * Chamada quando o usuário clica na aba "Relatórios".
+ * Popula o dropdown de anos e dispara o carregamento inicial.
+ */
 export async function initReports() {
-  const year = new Date().getFullYear();
-  document.getElementById('reportYear').value = year;
-
-  document.getElementById('reportYear')?.addEventListener('change', e => {
-    loadReport(parseInt(e.target.value));
-  });
-
-  // preenche o select de anos
-  const sel = document.getElementById('reportYear');
   const currentYear = new Date().getFullYear();
+  const sel = document.getElementById('reportYear');
+  if (!sel) return;
+
+  // Monta as opções de ano (ano seguinte até 5 anos atrás)
   sel.innerHTML = '';
   for (let y = currentYear + 1; y >= currentYear - 5; y--) {
     sel.innerHTML += `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`;
   }
 
-  await loadReport(year);
+  // Ouve a mudança de ano para recarregar os dados
+  sel.addEventListener('change', e => {
+    loadReport(parseInt(e.target.value));
+  });
+
+  await loadReport(currentYear);
 }
 
+/**
+ * Busca os dados do ano no Supabase e atualiza gráficos e tabela.
+ */
 async function loadReport(year) {
   const spinner = document.getElementById('reportsSpinner');
   if (spinner) spinner.style.display = 'flex';
@@ -46,11 +65,15 @@ async function loadReport(year) {
   }
 }
 
-// ── Gráfico de barras: Entradas vs Saídas por mês ─────────
+// ============================================================
+// 2. GRÁFICO DE BARRAS (Entradas vs Saídas por Mês)
+// ============================================================
 
 function renderBarChart(entries, year) {
+  // Inicializa array com 12 posições zeradas para entradas e saídas
   const monthlyData = Array.from({ length: 12 }, () => ({ entrada: 0, saida: 0 }));
 
+  // Agrega valores em cada mês
   for (const e of entries) {
     const month = parseInt(e.date.split('-')[1]) - 1;
     if (e.type === 'entrada') monthlyData[month].entrada += parseFloat(e.value);
@@ -60,6 +83,7 @@ function renderBarChart(entries, year) {
   const ctx = document.getElementById('barChart')?.getContext('2d');
   if (!ctx) return;
 
+  // Destrói o gráfico anterior para evitar sobreposição
   if (barChart) barChart.destroy();
 
   barChart = new Chart(ctx, {
@@ -99,13 +123,13 @@ function renderBarChart(entries, year) {
         },
       },
       scales: {
-        x: { //Cor dos números do gráfico de barras
+        x: {
           ticks: { color: 'rgba(255, 255, 255, 0.75)', font: { family: 'Inter' } },
           grid:  { color: 'rgba(255, 255, 255, 0.1)' },
         },
         y: {
           ticks: {
-            color: 'rgba(255, 255, 255, 0.75)', //Cor dos números do gráfico de barras
+            color: 'rgba(255, 255, 255, 0.75)',
             font: { family: 'Inter' },
             callback: v => formatCurrency(v),
           },
@@ -116,12 +140,15 @@ function renderBarChart(entries, year) {
   });
 }
 
-// ── Gráfico de pizza: Distribuição por categoria ───────────
+// ============================================================
+// 3. GRÁFICO DE ROSCA / PIZZA (Saídas por Categoria)
+// ============================================================
 
 function renderPieChart(entries) {
+  // Agrupa apenas lançamentos do tipo 'saida' por categoria
   const catMap = {};
   for (const e of entries) {
-    if (e.type !== 'saida') continue; // pizza apenas saídas
+    if (e.type !== 'saida') continue;
     const name  = e.category?.name || 'Sem categoria';
     const color = e.category?.color || '#8b6e52';
     if (!catMap[name]) catMap[name] = { value: 0, color };
@@ -136,6 +163,7 @@ function renderPieChart(entries) {
   if (!ctx) return;
   if (pieChart) pieChart.destroy();
 
+  // Se não houver saídas no ano, exibe mensagem informativa amigável
   if (!labels.length) {
     document.getElementById('pieNoData').style.display = 'flex';
     return;
@@ -173,12 +201,15 @@ function renderPieChart(entries) {
   });
 }
 
-// ── Tabela de histórico mensal ─────────────────────────────
+// ============================================================
+// 4. TABELA DE HISTÓRICO MENSAL
+// ============================================================
 
 function renderHistoryTable(entries) {
   const tbody = document.getElementById('historyBody');
   if (!tbody) return;
 
+  // Totaliza mês a mês
   const monthlyData = Array.from({ length: 12 }, () => ({ entrada: 0, saida: 0 }));
   for (const e of entries) {
     const month = parseInt(e.date.split('-')[1]) - 1;
@@ -186,6 +217,7 @@ function renderHistoryTable(entries) {
     else monthlyData[month].saida += parseFloat(e.value);
   }
 
+  // Gera as linhas da tabela com os saldos calculados
   tbody.innerHTML = monthlyData.map((m, i) => {
     const saldo = m.entrada - m.saida;
     const hasData = m.entrada > 0 || m.saida > 0;

@@ -1,22 +1,43 @@
 // ============================================================
-// AUTH.JS — Lógica de autenticação (login, signup, reset, new pwd)
+// AUTH.JS — Lógica de Autenticação e Gestão de Sessão
+// ------------------------------------------------------------
+// Controla os fluxos de:
+// 1. Alternância visual entre telas (Login, Cadastro, Esqueci Senha, Nova Senha)
+// 2. Medidor interativo de força de senha
+// 3. Login com e-mail e senha
+// 4. Cadastro de nova conta
+// 5. Envio de link de recuperação de senha
+// 6. Redefinição da nova senha
+// 7. Ouvinte de estado de autenticação e redirecionamentos
 // ============================================================
 
 import { supabase } from './supabase.js';
 
-// ── Utilitários de UI ──────────────────────────────────────
+// ============================================================
+// 1. UTILITÁRIOS DE INTERFACE (Feedback visual ao usuário)
+// ============================================================
 
+/**
+ * Exibe uma mensagem de feedback (erro, sucesso ou aviso) no topo do card.
+ */
 function showAlert(msg, type = 'error') {
   const el = document.getElementById('alertMsg');
   el.className = `alert-msg ${type}`;
   el.textContent = msg;
 }
+
+/**
+ * Limpa qualquer alerta exibido atualmente.
+ */
 function clearAlert() {
   const el = document.getElementById('alertMsg');
   el.className = 'alert-msg';
   el.textContent = '';
 }
 
+/**
+ * Altera o estado de carregamento de um botão (desabilita e adiciona spinner).
+ */
 function setLoading(btnId, loading, defaultText) {
   const btn = document.getElementById(btnId);
   if (!btn) return;
@@ -26,13 +47,19 @@ function setLoading(btnId, loading, defaultText) {
     : defaultText;
 }
 
-// ── Troca de view (tab / link) ─────────────────────────────
+// ============================================================
+// 2. CONTROLE DE ABAS E TELAS (View Router simples)
+// ============================================================
 
+/**
+ * Alterna dinamicamente a visibilidade das seções da tela de login.
+ * Disponível globalmente no objeto `window` para ser acionado por `onclick` no HTML.
+ */
 window.switchTab = function (view) {
   clearAlert();
-  // esconde todas as views
+  // Esconde todas as visualizações ativas
   document.querySelectorAll('.auth-view').forEach(v => v.classList.remove('active'));
-  // remove active de todos os tabs
+  // Desmarca os botões de aba
   document.querySelectorAll('.auth-tab-btn').forEach(b => b.classList.remove('active'));
 
   if (view === 'login') {
@@ -45,15 +72,24 @@ window.switchTab = function (view) {
     document.getElementById('authTabs').style.display = 'flex';
   } else if (view === 'reset') {
     document.getElementById('viewReset').classList.add('active');
-    document.getElementById('authTabs').style.display = 'none';
+    document.getElementById('authTabs').style.display = 'none'; // Esconde abas para focar no fluxo
   } else if (view === 'newpwd') {
     document.getElementById('viewNewPwd').classList.add('active');
     document.getElementById('authTabs').style.display = 'none';
   }
 };
 
-// ── Força da senha ─────────────────────────────────────────
+// ============================================================
+// 3. MEDIDOR DE FORÇA DA SENHA
+// ============================================================
 
+/**
+ * Avalia critérios de segurança da senha digitada e atualiza a barra colorida:
+ * - Comprimento (>= 6 e >= 10)
+ * - Letras maiúsculas
+ * - Números
+ * - Caracteres especiais
+ */
 function checkStrength(pwd, fillId, labelId) {
   const fill = document.getElementById(fillId);
   const label = document.getElementById(labelId);
@@ -80,6 +116,7 @@ function checkStrength(pwd, fillId, labelId) {
   label.style.color = lv.c;
 }
 
+// Ouve a digitação nos campos de senha para atualizar a força em tempo real
 document.getElementById('signupPassword')?.addEventListener('input', e => {
   checkStrength(e.target.value, 'pwdFill', 'pwdLabel');
 });
@@ -87,7 +124,9 @@ document.getElementById('newPwd')?.addEventListener('input', e => {
   checkStrength(e.target.value, 'pwdFill2', 'pwdLabel2');
 });
 
-// ── LOGIN ──────────────────────────────────────────────────
+// ============================================================
+// 4. FLUXO: LOGIN
+// ============================================================
 
 document.getElementById('formLogin')?.addEventListener('submit', async e => {
   e.preventDefault();
@@ -95,6 +134,7 @@ document.getElementById('formLogin')?.addEventListener('submit', async e => {
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
 
+  // Validação básica de campos
   if (!email || !password) {
     showAlert('Preencha todos os campos.'); return;
   }
@@ -103,6 +143,7 @@ document.getElementById('formLogin')?.addEventListener('submit', async e => {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   setLoading('btnLogin', false, 'Entrar');
 
+  // Trata mensagens de erro retornadas pelo Supabase
   if (error) {
     if (error.message.includes('Email not confirmed')) {
       showAlert('Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada.', 'info');
@@ -113,10 +154,14 @@ document.getElementById('formLogin')?.addEventListener('submit', async e => {
     }
     return;
   }
+
+  // Sucesso: redireciona para o aplicativo principal
   window.location.href = 'app.html';
 });
 
-// ── CADASTRO ───────────────────────────────────────────────
+// ============================================================
+// 5. FLUXO: CADASTRO
+// ============================================================
 
 document.getElementById('formSignup')?.addEventListener('submit', async e => {
   e.preventDefault();
@@ -126,6 +171,7 @@ document.getElementById('formSignup')?.addEventListener('submit', async e => {
   const password = document.getElementById('signupPassword').value;
   const confirm  = document.getElementById('signupConfirm').value;
 
+  // Validações no cliente
   if (!name || !email || !password || !confirm) {
     showAlert('Preencha todos os campos.'); return;
   }
@@ -137,6 +183,7 @@ document.getElementById('formSignup')?.addEventListener('submit', async e => {
   }
 
   setLoading('btnSignup', true);
+  // Cria a conta enviando os metadados do nome para o trigger criar o profile no banco
   const { error } = await supabase.auth.signUp({
     email,
     password,
@@ -159,7 +206,9 @@ document.getElementById('formSignup')?.addEventListener('submit', async e => {
   document.getElementById('formSignup').reset();
 });
 
-// ── RESET DE SENHA (solicitar link) ───────────────────────
+// ============================================================
+// 6. FLUXO: RECUPERAÇÃO DE SENHA (Solicitar Link)
+// ============================================================
 
 document.getElementById('formReset')?.addEventListener('submit', async e => {
   e.preventDefault();
@@ -179,7 +228,9 @@ document.getElementById('formReset')?.addEventListener('submit', async e => {
   document.getElementById('formReset').reset();
 });
 
-// ── NOVA SENHA (vindo do link do e-mail) ──────────────────
+// ============================================================
+// 7. FLUXO: NOVA SENHA (Após clicar no link recebido por e-mail)
+// ============================================================
 
 document.getElementById('formNewPwd')?.addEventListener('submit', async e => {
   e.preventDefault();
@@ -196,6 +247,7 @@ document.getElementById('formNewPwd')?.addEventListener('submit', async e => {
 
   if (error) { showAlert(error.message); return; }
   showAlert('Senha alterada com sucesso! Redirecionando...', 'success');
+  // Desloga e volta para o login após 2 segundos
   setTimeout(() => {
     supabase.auth.signOut().then(() => {
       window.location.href = 'index.html';
@@ -203,24 +255,25 @@ document.getElementById('formNewPwd')?.addEventListener('submit', async e => {
   }, 2000);
 });
 
-// ── Inicialização: checar estado de auth e URL ─────────────
+// ============================================================
+// 8. INICIALIZAÇÃO E TRATAMENTO DE LINKS DE RECUPERAÇÃO
+// ============================================================
 
 async function init() {
-  // 1. Checa a URL sincronamente para evitar o redirecionamento imediato
+  // 1. Checa se o usuário acessou a página via link de recuperação de senha
   const hash = window.location.hash;
   const params = new URLSearchParams(window.location.search);
   const type = params.get('type') || (hash.includes('type=recovery') ? 'recovery' : null);
 
   if (type === 'recovery') {
     switchTab('newpwd');
-    // Escutamos o evento apenas para garantir, mas já estamos na aba certa
     supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') switchTab('newpwd');
     });
-    return; // Importante: interrompe o fluxo para não checar a sessão e redirecionar
+    return; // Interrompe para não redirecionar antes de redefinir a senha
   }
 
-  // 2. Escuta eventos normais
+  // 2. Escuta eventos normais de autenticação
   supabase.auth.onAuthStateChange((event, session) => {
     if (event === 'PASSWORD_RECOVERY') {
       switchTab('newpwd');
@@ -230,7 +283,7 @@ async function init() {
     }
   });
 
-  // 3. Checa a sessão atual no carregamento normal
+  // 3. Se já houver sessão ativa, vai direto para o app
   const { data: { session } } = await supabase.auth.getSession();
   if (session) {
     const isNewPwdView = document.getElementById('viewNewPwd').classList.contains('active');
@@ -240,4 +293,5 @@ async function init() {
   }
 }
 
+// Executa a checagem inicial
 init();
